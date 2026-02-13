@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Impact Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo"><span>🌿</span></div>
+        <div>
+          <h1 class="title">AI Impact</h1>
+          <p class="subtitle">Tracker</p>
+        </div>
+      </div>
+      <button class="btn-reset" id="btnReset" title="Remettre à zéro">↺</button>
+    </header>
+
+    <!-- Tabs navigation -->
+    <nav class="tabs">
+      <button class="tab active" data-tab="overview">Vue d'ensemble</button>
+      <button class="tab" data-tab="stats">Statistiques</button>
+    </nav>
+
+    <!-- ══ TAB : Vue d'ensemble ══ -->
+    <div class="tab-content active" id="tab-overview">
+
+      <div class="hero-card">
+        <div class="tree-visual" id="treeVisual">🌳</div>
+        <div class="hero-number" id="heroTreeDays">0.000</div>
+        <div class="hero-label">jours qu'un arbre met à absorber ce CO₂</div>
+        <div class="hero-sub" id="heroRequests">0 requête IA envoyée</div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card" data-color="green">
+          <div class="metric-icon">⚡</div>
+          <div class="metric-value" id="metricEnergy">0.00000</div>
+          <div class="metric-unit">kWh consommés</div>
+          <div class="metric-label" id="labelEnergy">Équiv. à 0 min d'ampoule LED</div>
+        </div>
+        <div class="metric-card" data-color="orange">
+          <div class="metric-icon">☁️</div>
+          <div class="metric-value" id="metricCo2">0.00</div>
+          <div class="metric-unit" id="unitCo2">g de CO₂ émis</div>
+          <div class="metric-label" id="labelCo2">Comme 0 m en voiture</div>
+        </div>
+        <div class="metric-card" data-color="blue">
+          <div class="metric-icon">💧</div>
+          <div class="metric-value" id="metricWater">0.0</div>
+          <div class="metric-unit" id="unitWater">mL d'eau utilisés</div>
+          <div class="metric-label" id="labelWater">Moins d'une gorgée</div>
+        </div>
+        <div class="metric-card" data-color="red">
+          <div class="metric-icon">📱</div>
+          <div class="metric-value" id="metricPhones">0.00</div>
+          <div class="metric-unit">recharges de téléphone</div>
+          <div class="metric-label" id="labelPhones">Équivalent en énergie</div>
+        </div>
+      </div>
+
+      <div class="platforms-section">
+        <div class="section-title">Par plateforme IA</div>
+        <div class="platforms-list" id="platformsList">
+          <div class="no-data">Aucune activité détectée.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══ TAB : Statistiques ══ -->
+    <div class="tab-content" id="tab-stats">
+
+      <!-- Semaine courante vs précédente -->
+      <div class="stat-block">
+        <div class="section-title">Cette semaine vs semaine précédente</div>
+        <div class="week-compare">
+          <div class="week-col">
+            <div class="week-label">Semaine passée</div>
+            <div class="week-value" id="weekPrev">—</div>
+            <div class="week-sub" id="weekPrevCo2">—</div>
+          </div>
+          <div class="week-arrow" id="weekArrow">→</div>
+          <div class="week-col current">
+            <div class="week-label">Cette semaine</div>
+            <div class="week-value" id="weekCurr">—</div>
+            <div class="week-sub" id="weekCurrCo2">—</div>
+          </div>
+          <div class="week-delta" id="weekDelta"></div>
+        </div>
+      </div>
+
+      <!-- Courbe 14 jours -->
+      <div class="stat-block">
+        <div class="section-title">Évolution sur 14 jours</div>
+        <div class="chart-wrap">
+          <svg id="chartSvg" viewBox="0 0 288 80" preserveAspectRatio="none"></svg>
+          <div class="chart-labels" id="chartLabels"></div>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-dot" style="background:var(--green)"></span>
+          <span>Requêtes / jour</span>
+        </div>
+      </div>
+
+      <!-- Top plateforme du mois -->
+      <div class="stat-block">
+        <div class="section-title">Top plateforme ce mois-ci</div>
+        <div class="top-platform" id="topPlatform">
+          <div class="no-data">Pas encore de données ce mois-ci.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span id="startDate">Depuis aujourd'hui</span>
+      <span class="footer-dot">·</span>
+      <a href="https://github.com/thomas370/ai-impact-tracker" target="_blank" class="footer-link">GitHub</a>
+    </footer>
+
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

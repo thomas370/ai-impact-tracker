@@ -1,0 +1,104 @@
+/**
+ * background.js v2
+ * - Stocke les stats globales par plateforme (comme avant)
+ * - Stocke en PLUS un historique jour par jour : history[YYYY-MM-DD][platform] = count
+ * Compatible Chrome MV3 et Firefox MV2
+ */
+
+const ENERGY_PER_REQUEST = {
+  chatgpt: 0.0029, claude: 0.0025, gemini: 0.0025,
+  mistral: 0.0008, perplexity: 0.0035, copilot: 0.0029,
+  grok: 0.0025, huggingface: 0.0015, poe: 0.0020, default: 0.0020,
+};
+const CO2_PER_KWH   = 475;
+const WATER_PER_KWH = 1800;
+const CO2_TREE_DAY  = 57.53;
+const CO2_PER_KM    = 120;
+const KWH_PHONE     = 0.012;
+
+function round(n, d) {
+  return Math.round(n * Math.pow(10, d)) / Math.pow(10, d);
+}
+
+function calcTotalImpacts(stats) {
+  let totalRequests = 0, totalEnergy = 0, totalCo2 = 0, totalWater = 0;
+  for (const [platform, count] of Object.entries(stats)) {
+    if (platform.startsWith("_")) continue;
+    const kwh = (ENERGY_PER_REQUEST[platform] ?? ENERGY_PER_REQUEST.default) * count;
+    totalRequests += count;
+    totalEnergy   += kwh;
+    totalCo2      += kwh * CO2_PER_KWH;
+    totalWater    += kwh * WATER_PER_KWH;
+  }
+  return {
+    requests:    totalRequests,
+    energyKwh:   round(totalEnergy, 5),
+    co2g:        round(totalCo2, 2),
+    co2kg:       round(totalCo2 / 1000, 5),
+    waterMl:     round(totalWater, 1),
+    waterL:      round(totalWater / 1000, 3),
+    treeDays:    round(totalCo2 / CO2_TREE_DAY, 4),
+    carKm:       round(totalCo2 / CO2_PER_KM, 3),
+    smartphones: round(totalEnergy / KWH_PHONE, 2),
+  };
+}
+
+// Clé du jour courant : "2025-06-15"
+function todayKey() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+const api = typeof browser !== "undefined" ? browser : chrome;
+
+function storageGet(keys) {
+  return new Promise((resolve) => api.storage.local.get(keys, resolve));
+}
+function storageSet(obj) {
+  return new Promise((resolve) => api.storage.local.set(obj, resolve));
+}
+
+// ── Message handler ───────────────────────────────────────────────────
+api.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+  // Nouveau prompt détecté
+  if (message.type === "PROMPT_SENT") {
+    const platform = message.platform || "default";
+    const count    = message.count || 1;
+    const day      = todayKey();
+
+    storageGet(["aiTrackerStats", "aiTrackerHistory"]).then((result) => {
+      // Stats globales
+      const stats = result.aiTrackerStats ?? { _startDate: new Date().toISOString() };
+      stats[platform] = (stats[platform] || 0) + count;
+
+      // Historique jour par jour
+      const history = result.aiTrackerHistory ?? {};
+      if (!history[day]) history[day] = {};
+      history[day][platform] = (history[day][platform] || 0) + count;
+
+      return storageSet({ aiTrackerStats: stats, aiTrackerHistory: history });
+    }).then(() => sendResponse({ ok: true }))
+      .catch(console.error);
+
+    return true;
+  }
+
+  // Lecture des stats pour le popup
+  if (message.type === "GET_STATS") {
+    storageGet(["aiTrackerStats", "aiTrackerHistory"]).then((result) => {
+      const stats   = result.aiTrackerStats   ?? { _startDate: new Date().toISOString() };
+      const history = result.aiTrackerHistory ?? {};
+      const impacts = calcTotalImpacts(stats);
+      sendResponse({ stats, history, impacts, startDate: stats._startDate });
+    }).catch(console.error);
+    return true;
+  }
+
+  // Reset total
+  if (message.type === "RESET_STATS") {
+    const fresh = { _startDate: new Date().toISOString() };
+    storageSet({ aiTrackerStats: fresh, aiTrackerHistory: {} })
+      .then(() => sendResponse({ ok: true }));
+    return true;
+  }
+});

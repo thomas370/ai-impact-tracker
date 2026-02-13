@@ -1,0 +1,64 @@
+{
+  "manifest_version": 2,
+  "name": "AI Impact Tracker",
+  "version": "1.0.0",
+  "description": "Estime l'impact environnemental de votre utilisation des IA (CO₂, arbres, eau)",
+  "icons": {
+    "16": "src/icons/icon16.png",
+    "48": "src/icons/icon48.png",
+    "128": "src/icons/icon128.png"
+  },
+  "browser_action": {
+    "default_popup": "src/popup.html",
+    "default_icon": {
+      "16": "src/icons/icon16.png",
+      "48": "src/icons/icon48.png",
+      "128": "src/icons/icon128.png"
+    }
+  },
+  "background": {
+    "scripts": ["src/background.js"],
+    "persistent": false
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://www.perplexity.ai/*",
+        "https://copilot.microsoft.com/*",
+        "https://mistral.ai/*",
+        "https://chat.mistral.ai/*",
+        "https://huggingface.co/chat/*",
+        "https://poe.com/*",
+        "https://grok.x.ai/*",
+        "https://x.com/i/grok*"
+      ],
+      "js": ["src/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "storage",
+    "https://chat.openai.com/*",
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://gemini.google.com/*",
+    "https://www.perplexity.ai/*",
+    "https://copilot.microsoft.com/*",
+    "https://mistral.ai/*",
+    "https://chat.mistral.ai/*",
+    "https://huggingface.co/chat/*",
+    "https://poe.com/*",
+    "https://grok.x.ai/*",
+    "https://x.com/i/grok*"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "ai-impact-tracker@extension",
+      "strict_min_version": "91.0"
+    }
+  }
+}
